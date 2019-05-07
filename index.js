@@ -30,11 +30,11 @@ if (process.platform === 'win32') {
   })
 }
 
-function logid (pkg, stage) {
+function logid(pkg, stage) {
   return pkg._id + '~' + stage + ':'
 }
 
-function hookStat (dir, stage, cb) {
+function hookStat(dir, stage, cb) {
   const hook = path.join(dir, '.hooks', stage)
   const cachedStatError = hookStatCache.get(hook)
 
@@ -48,7 +48,7 @@ function hookStat (dir, stage, cb) {
   return setImmediate(() => cb(cachedStatError))
 }
 
-function lifecycle (pkg, stage, wd, opts) {
+function lifecycle(pkg, stage, wd, opts) {
   return new Promise((resolve, reject) => {
     while (pkg && pkg._data) pkg = pkg._data
     if (!pkg) return reject(new Error('Invalid package data'))
@@ -70,7 +70,7 @@ function lifecycle (pkg, stage, wd, opts) {
         if (er) return reject(er)
 
         if ((wd.indexOf(opts.dir) !== 0 || _incorrectWorkingDirectory(wd, pkg)) &&
-            !opts.unsafePerm && pkg.scripts[stage]) {
+          !opts.unsafePerm && pkg.scripts[stage]) {
           opts.log.warn('lifecycle', logid(pkg, stage), 'cannot run in wd', pkg._id, pkg.scripts[stage], `(wd=${wd})`)
           return resolve()
         }
@@ -96,11 +96,11 @@ function lifecycle (pkg, stage, wd, opts) {
   })
 }
 
-function _incorrectWorkingDirectory (wd, pkg) {
+function _incorrectWorkingDirectory(wd, pkg) {
   return wd.lastIndexOf(pkg.name) !== wd.length - pkg.name.length
 }
 
-function lifecycle_ (pkg, stage, wd, opts, env, cb) {
+function lifecycle_(pkg, stage, wd, opts, env, cb) {
   var pathArr = []
   var p = wd.split(/[\\/]node_modules[\\/]/)
   var acc = path.resolve(p.shift())
@@ -135,7 +135,7 @@ function lifecycle_ (pkg, stage, wd, opts, env, cb) {
     opts.log.silly('lifecycle', logid(pkg, stage), 'no script for ' + stage + ', continuing')
   }
 
-  function done (er) {
+  function done(er) {
     if (er) {
       if (opts.force) {
         opts.log.info('lifecycle', logid(pkg, stage), 'forced, continuing', er)
@@ -157,7 +157,7 @@ function lifecycle_ (pkg, stage, wd, opts, env, cb) {
   )
 }
 
-function shouldPrependCurrentNodeDirToPATH (opts) {
+function shouldPrependCurrentNodeDirToPATH(opts) {
   const cfgsetting = opts.scriptsPrependNodePath
   if (cfgsetting === false) return false
   if (cfgsetting === true) return true
@@ -167,10 +167,10 @@ function shouldPrependCurrentNodeDirToPATH (opts) {
   var isWindows = process.platform === 'win32'
   var foundExecPath
   try {
-    foundExecPath = which.sync(path.basename(process.execPath), {pathExt: isWindows ? ';' : ':'})
+    foundExecPath = which.sync(path.basename(process.execPath), { pathExt: isWindows ? ';' : ':' })
     // Apply `fs.realpath()` here to avoid false positives when `node` is a symlinked executable.
     isDifferentNodeInPath = fs.realpathSync(process.execPath).toUpperCase() !==
-        fs.realpathSync(foundExecPath).toUpperCase()
+      fs.realpathSync(foundExecPath).toUpperCase()
   } catch (e) {
     isDifferentNodeInPath = true
   }
@@ -191,7 +191,7 @@ function shouldPrependCurrentNodeDirToPATH (opts) {
   return isDifferentNodeInPath
 }
 
-function validWd (d, cb) {
+function validWd(d, cb) {
   fs.stat(d, function (er, st) {
     if (er || !st.isDirectory()) {
       var p = path.dirname(d)
@@ -204,18 +204,18 @@ function validWd (d, cb) {
   })
 }
 
-function runPackageLifecycle (pkg, stage, env, wd, opts, cb) {
+function runPackageLifecycle(pkg, stage, env, wd, opts, cb) {
   // run package lifecycle scripts in the package root, or the nearest parent.
   var cmd = env.npm_lifecycle_script
 
   var note = '\n> ' + pkg._id + ' ' + stage + ' ' + wd +
-             '\n> ' + cmd + '\n'
+    '\n> ' + cmd + '\n'
   runCmd(note, cmd, pkg, env, stage, wd, opts, cb)
 }
 
 var running = false
 var queue = []
-function dequeue () {
+function dequeue() {
   running = false
   if (queue.length) {
     var r = queue.shift()
@@ -223,7 +223,7 @@ function dequeue () {
   }
 }
 
-function runCmd (note, cmd, pkg, env, stage, wd, opts, cb) {
+function runCmd(note, cmd, pkg, env, stage, wd, opts, cb) {
   if (running) {
     queue.push([note, cmd, pkg, env, stage, wd, opts, cb])
     return
@@ -255,8 +255,8 @@ function runCmd (note, cmd, pkg, env, stage, wd, opts, cb) {
   }
 }
 
-function runCmd_ (cmd, pkg, env, wd, opts, stage, unsafe, uid, gid, cb_) {
-  function cb (er) {
+function runCmd_(cmd, pkg, env, wd, opts, stage, unsafe, uid, gid, cb_) {
+  function cb(er) {
     cb_.apply(null, arguments)
     opts.log.resume()
     process.nextTick(dequeue)
@@ -265,7 +265,7 @@ function runCmd_ (cmd, pkg, env, wd, opts, stage, unsafe, uid, gid, cb_) {
   var conf = {
     cwd: wd,
     env: env,
-    stdio: opts.stdio || [ 0, 1, 2 ]
+    stdio: opts.stdio || [0, 1, 2]
   }
 
   if (!unsafe) {
@@ -312,11 +312,11 @@ function runCmd_ (cmd, pkg, env, wd, opts, stage, unsafe, uid, gid, cb_) {
   process.once('SIGTERM', procKill)
   process.once('SIGINT', procInterupt)
 
-  function procError (er) {
+  function procError(er) {
     if (er) {
       opts.log.info('lifecycle', logid(pkg, stage), 'Failed to exec ' + stage + ' script')
       er.message = pkg._id + ' ' + stage + ': `' + cmd + '`\n' +
-                   er.message
+        er.message
       if (er.code !== 'EPERM') {
         er.code = 'ELIFECYCLE'
       }
@@ -333,12 +333,13 @@ function runCmd_ (cmd, pkg, env, wd, opts, stage, unsafe, uid, gid, cb_) {
     process.removeListener('SIGTERM', procKill)
     process.removeListener('SIGTERM', procInterupt)
     process.removeListener('SIGINT', procKill)
+    process.removeListener('SIGINT', procInterupt)
     return cb(er)
   }
-  function procKill () {
+  function procKill() {
     proc.kill()
   }
-  function procInterupt () {
+  function procInterupt() {
     proc.kill('SIGINT')
     proc.on('exit', function () {
       process.exit()
@@ -347,17 +348,17 @@ function runCmd_ (cmd, pkg, env, wd, opts, stage, unsafe, uid, gid, cb_) {
   }
 }
 
-function runHookLifecycle (pkg, stage, env, wd, opts, cb) {
+function runHookLifecycle(pkg, stage, env, wd, opts, cb) {
   hookStat(opts.dir, stage, function (er) {
     if (er) return cb()
     var cmd = path.join(opts.dir, '.hooks', stage)
     var note = '\n> ' + pkg._id + ' ' + stage + ' ' + wd +
-               '\n> ' + cmd
+      '\n> ' + cmd
     runCmd(note, cmd, pkg, env, stage, wd, opts, cb)
   })
 }
 
-function makeEnv (data, opts, prefix, env) {
+function makeEnv(data, opts, prefix, env) {
   prefix = prefix || 'npm_package_'
   if (!env) {
     env = {}
@@ -449,12 +450,12 @@ function makeEnv (data, opts, prefix, env) {
   })
 
   prefix = 'npm_package_config_'
-  ;[pkgConfig, pkgVerConfig].forEach(function (conf) {
-    for (var i in conf) {
-      var envKey = (prefix + i)
-      env[envKey] = conf[i]
-    }
-  })
+    ;[pkgConfig, pkgVerConfig].forEach(function (conf) {
+      for (var i in conf) {
+        var envKey = (prefix + i)
+        env[envKey] = conf[i]
+      }
+    })
 
   return env
 }
